@@ -33,16 +33,20 @@
 
         <Button
             android:id="@+id/quit"
+            android:layout_marginRight="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
+            android:background="@color/red"
             android:text="Quit"/>
 
         <Button
             android:id="@+id/returntogame"
+            android:layout_marginLeft="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
+            android:background="@color/green"
             android:text="Return to game"/>
 
     </LinearLayout>

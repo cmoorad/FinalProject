@@ -136,12 +136,26 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
         view = (LinearLayout) findViewById(R.id.gameview);
 
-        requestPermissions();
-
         //grabs username and password from intent
         Intent i = getIntent();
         user1 = i.getStringExtra("user");
         pass1 = i.getStringExtra("pass");
+
+        Bundle extras = i.getExtras();
+        if (extras != null) {
+            if (extras.containsKey("gametype")) {
+                String type = i.getStringExtra("gametype");
+                boolean success = i.getExtras().getBoolean("success");
+                if (type == "river") {
+                    riversuccess = success;
+                } else if (type == "forest") {
+                    forestsuccess = success;
+                } else if (type == "urban") {
+                    urbansuccess = success;
+                }
+            }
+        }
+
 
         dl = new Handler();
         ctx = this;
@@ -232,11 +246,11 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         mMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(16f)); // buildings-level
 
-        TextView name = view.findViewById(R.id.catname);
-        name.setText("Try to click the pointers!");
+        //int comp = getNumberGamesCompleted();
+        TextView openingmsg = view.findViewById(R.id.userscore);
+        openingmsg.setText(user1 + ", you have completed" /*+ comp*/ + " out of 3 minigames!");
 
-        TextView dist = view.findViewById(R.id.catdist);
-        dist.setText("");
+
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -764,6 +778,9 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
     }
 
+
+
+
     //following three are required methods for api
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -780,38 +797,6 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
     }
 
-    //double check permissions even though checked in main activity (just for troubleshoot purposes)
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    public void requestPermissions(){
-        // Here, thisActivity is the current activity
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(Manifest.permission.INTERNET)
-                        != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET},
-                    MY_PERMISSIONS_REQUEST);
-        }
-
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST: {
-                // If request is cancelled, the result arrays are empty.
-                if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                        grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                        grantResults[2] == PackageManager.PERMISSION_GRANTED)) {
-                    // permissions not obtained
-                    Toast.makeText(this,"failed request permission!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
 
 
     //NEW NOTIFICATION METHODS
@@ -876,7 +861,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
     }
 
 
-/*
+    /*
     public void inGameZone(LatLng currentlocation) {
 
         Double lat = currentlocation.latitude;
@@ -887,6 +872,9 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         //RIVER GAME
         if ((bottom < lat && lat < top) && (left < lng && lng < right)) {
             //call river game activity
+            Intent i = new Intent(this, RiverGame.class);
+            i.putExtra("user", user1);
+            i.putExtra("user", user1);
 
         }
 
