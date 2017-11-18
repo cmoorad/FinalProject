@@ -107,6 +107,11 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
     public boolean tracking = false;
     public double trackingDistance;
 
+    //new game
+    public boolean riversuccess = false;
+    public boolean forestsuccess = false;
+    public boolean urbansuccess = false;
+
     private GoogleMap mMap;
     private boolean permCheck = false;
     private LocationManager mgr;
@@ -163,6 +168,11 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
         //get all the cats for the map
         getCats(mapFragment.getView());
+
+        //Check to see if complete game success
+        if (riversuccess && forestsuccess && urbansuccess) {
+            gameSuccess();
+        }
 
     }
 
@@ -897,6 +907,16 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
     }
     */
+
+    public void gameSuccess() {
+
+        Intent myIntent = new Intent(this, GameComplete.class);
+        myIntent.putExtra("user", user1);
+        myIntent.putExtra("pass", pass1);
+        startActivity(myIntent);
+
+
+    }
 
 
 

@@ -45,6 +45,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".Game" />
+        <activity android:name=".GameComplete" />
         <activity android:name=".Success" />
     </application>
 
