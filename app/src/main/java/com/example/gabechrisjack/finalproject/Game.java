@@ -886,17 +886,21 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
         //RIVER GAME
         if ((bottom < lat && lat < top) && (left < lng && lng < right)) {
+            //call river game activity
 
         }
 
-        //FORREST GAME
+        //FOREST GAME
         else if () {
+            //call forest game activity
 
         }
 
 
         //URBAN GAME
         else if () {
+            //call urban game activity
+
 
         }
 

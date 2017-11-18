@@ -35,6 +35,8 @@ public class GameComplete extends AppCompatActivity {
         user = i.getStringExtra("user");
         pass = i.getStringExtra("pass");
 
+        TextView congrats = findViewById(R.id.congrats);
+        congrats.setText("Congratulations " + user + "!");
 
 
         Button quitbutton = view.findViewById(R.id.quit);
@@ -51,7 +53,7 @@ public class GameComplete extends AppCompatActivity {
         });
 
 
-        Button returnbutton = view.findViewById(R.id.quit);
+        Button returnbutton = view.findViewById(R.id.returntogame);
         returnbutton.setBackgroundColor(getResources().getColor(R.color.green));
 
         returnbutton.setOnClickListener(new View.OnClickListener() {
