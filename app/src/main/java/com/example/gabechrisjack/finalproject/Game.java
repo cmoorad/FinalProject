@@ -70,6 +70,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.LongToIntFunction;
@@ -91,6 +92,9 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
     public boolean riversuccess = false;
     public boolean forestsuccess = false;
     public boolean urbansuccess = false;
+    public List<LatLng> riverpoly;
+    public List<LatLng> urbanpoly;
+    public List<LatLng> forestpoly;
 
     private GoogleMap mMap;
     private boolean permCheck = false;
@@ -170,6 +174,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
     }
 
     //SETS UP THE MAP INITIALLY, WITH APPROPRIATE ZOOM AND POLYGONS
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -214,19 +219,42 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
 
         //THE WAY THESE ARE CREATED SHOULD BE ACCESSIBLE LATER
-        List<LatLng> riverpoly = PolyUtil.decode("riverpoly");
+        riverpoly = new ArrayList<LatLng>();
+        riverpoly.add(new LatLng(43.710714, -72.290854));
+        riverpoly.add(new LatLng(43.703548, -72.298322));
+        riverpoly.add(new LatLng(43.704448, -72.301755));
+        riverpoly.add(new LatLng(43.712544, -72.292786));
 
         //DRAW RIVER POLYGON
         Polygon polygon = mMap.addPolygon( new PolygonOptions()
             .addAll(riverpoly)
-            .add(new LatLng(43.710714, -72.290854), new LatLng(43.703548, -72.298322),
-                    new LatLng(43.704448, -72.301755), new LatLng(43.712544, -72.292786))
             .strokeColor(Color.BLUE)
-            .fillColor(Color.parseColor("#0044cc")));
+            .fillColor(getColor(R.color.transblue)));
 
 
+        urbanpoly = new ArrayList<LatLng>();
+        urbanpoly.add(new LatLng(43.705907, -72.288247));
+        urbanpoly.add(new LatLng(43.704853, -72.288172));
+        urbanpoly.add(new LatLng(43.704853, -72.289438));
+        urbanpoly.add(new LatLng(43.706000, -72.289481));
 
-        //add polygon to util list
+
+        Polygon polygon1 = mMap.addPolygon( new PolygonOptions()
+            .addAll(urbanpoly)
+            .strokeColor(Color.BLACK)
+            .fillColor(getColor(R.color.transgrey)));
+
+        forestpoly = new ArrayList<LatLng>();
+        forestpoly.add(new LatLng(43.707711, -72.283280));
+        forestpoly.add(new LatLng(43.704640, -72.283709));
+        forestpoly.add(new LatLng(43.704066, -72.284975));
+        forestpoly.add(new LatLng(43.704749, -72.286112));
+        forestpoly.add(new LatLng(43.707603, -72.284911));
+
+        Polygon polygon2 = mMap.addPolygon( new PolygonOptions()
+                .addAll(forestpoly)
+                .strokeColor(Color.GREEN)
+                .fillColor(getColor(R.color.transgreen)));
 
     }
 
@@ -248,7 +276,6 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
             requestPermissions(new String[]{Manifest.permission.INTERNET}, 0);
         }
     }
-
 
     //post method = for example purposes
     /**
@@ -346,8 +373,77 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
     }
 
+    public void playMinigame(View v) {
 
+        Double lat = loc.latitude;
+        Double lng = loc.longitude;
 
+        //LNGS ARE NEGATIVE!!!
+
+        boolean inriver = PolyUtil.containsLocation(loc, riverpoly, false);
+        boolean inurban = PolyUtil.containsLocation(loc, urbanpoly, false);
+        boolean inforest = PolyUtil.containsLocation(loc, forestpoly, false);
+
+        if (inriver) {
+            Log.d("AYYYY LET'S GOOO", "we did it");
+            Intent myIntent = new Intent(this, GameComplete.class);
+            myIntent.putExtra("user", user1);
+            myIntent.putExtra("pass", pass1);
+            startActivity(myIntent);
+        }
+
+        else if (inurban) {
+            Log.d("AYYYY LET'S GOOO", "we did it");
+            Intent myIntent = new Intent(this, GameComplete.class);
+            myIntent.putExtra("user", user1);
+            myIntent.putExtra("pass", pass1);
+            startActivity(myIntent);
+        }
+
+        else if (inforest) {
+            Log.d("AYYYY LET'S GOOO", "we did it");
+            Intent myIntent = new Intent(this, GameComplete.class);
+            myIntent.putExtra("user", user1);
+            myIntent.putExtra("pass", pass1);
+            startActivity(myIntent);
+        }
+
+        else {
+
+            AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
+            dlgAlert.setTitle("Whoops!");
+            dlgAlert.setPositiveButton("OK", null);
+            dlgAlert.setCancelable(true);
+            dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            dlgAlert.setMessage("You need to be in one of the minigame zones before " +
+                    "you can play a minigame!");
+            dlgAlert.create().show();
+
+        }
+    }
+
+    public void gameSuccess() {
+        Intent myIntent = new Intent(this, GameComplete.class);
+        myIntent.putExtra("user", user1);
+        myIntent.putExtra("pass", pass1);
+        startActivity(myIntent);
+    }
+
+    public void quitClicked(View v) {
+        Intent myIntent = new Intent(this, MainActivity.class);
+        myIntent.putExtra("user", user1);
+        myIntent.putExtra("pass", pass1);
+        startActivity(myIntent);
+    }
+
+    public void resetGames(View v) {
+        riversuccess = false;
+        forestsuccess = false;
+        urbansuccess = false;
+    }
 
     //following three are required methods for api
     @Override
@@ -364,85 +460,5 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
     public void onProviderDisabled(String s) {
 
     }
-
-
-
-    public void playMinigame() {
-
-    }
-
-
-    /*
-    public static boolean containsLocation(LatLng point, java.util.List polygon, boolean geodesic) {
-        super
-    }
-    */
-
-
-
-
-    public void inGameZone(LatLng currentlocation) {
-
-        Double lat = currentlocation.latitude;
-        Double lng = currentlocation.longitude;
-
-        //LNGS ARE NEGATIVE!!!
-
-        boolean inpoly = PolyUtil.containsLocation(currentlocation, java.util.List<LatLng> riverpoly, false);
-
-        //RIVER GAME
-        if ((bottom < lat && lat < top) && (left < lng && lng < right)) {
-            //call river game activity
-            Intent i = new Intent(this, RiverGame.class);
-            i.putExtra("user", user1);
-            i.putExtra("user", user1);
-
-        }
-
-        //FOREST GAME
-        else if () {
-            //call forest game activity
-
-        }
-
-
-        //URBAN GAME
-        else if () {
-            //call urban game activity
-
-
-        }
-
-        else {
-
-            AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
-            dlgAlert.setTitle("Whoops!");
-            dlgAlert.setPositiveButton("OK", null);
-            dlgAlert.setCancelable(true);
-            dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                }
-            });
-            dlgAlert.setMessage("You need to be in one of the minigame territories before " +
-                    "you can play a minigame!");
-            dlgAlert.create().show();
-
-        }
-
-
-    }
-    */
-
-    public void gameSuccess() {
-
-        Intent myIntent = new Intent(this, GameComplete.class);
-        myIntent.putExtra("user", user1);
-        myIntent.putExtra("pass", pass1);
-        startActivity(myIntent);
-
-
-    }
-
-
 
 }

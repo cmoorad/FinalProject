@@ -8,4 +8,7 @@
     <color name="blue">#add8e6</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
+    <color name="transblue">#7f0044cc</color>
+    <color name="transgreen">#7f00ff00</color>
+    <color name="transgrey">#7fA9A9A9</color>
 </resources>

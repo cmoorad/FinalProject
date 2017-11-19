@@ -37,37 +37,20 @@ public class GameComplete extends AppCompatActivity {
 
         TextView congrats = findViewById(R.id.congrats);
         congrats.setText("Congratulations " + user + "!");
+    }
 
+    public void quitGame(View v) {
+        Intent myIntent = new Intent(this, MainActivity.class);
+        myIntent.putExtra("user", user);
+        myIntent.putExtra("pass", pass);
+        startActivity(myIntent);
+    }
 
-        Button quitbutton = view.findViewById(R.id.quit);
-        quitbutton.setBackgroundColor(getResources().getColor(R.color.red));
-
-        quitbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(getActivity(), MainActivity.class);
-                myIntent.putExtra("user", user);
-                myIntent.putExtra("pass", pass);
-                startActivity(myIntent);
-            }
-        });
-
-
-        Button returnbutton = view.findViewById(R.id.returntogame);
-        returnbutton.setBackgroundColor(getResources().getColor(R.color.green));
-
-        returnbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(getActivity(), Game.class);
-                myIntent.putExtra("user", user);
-                myIntent.putExtra("pass", pass);
-                startActivity(myIntent);
-            }
-        });
-
-
-
+    public void returnToGame(View v) {
+        Intent myIntent = new Intent(this, Game.class);
+        myIntent.putExtra("user", user);
+        myIntent.putExtra("pass", pass);
+        startActivity(myIntent);
     }
 
 

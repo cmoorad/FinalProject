@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".GameComplete">
 
 
     <TextView
@@ -38,7 +41,8 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:background="@color/red"
-            android:text="Quit"/>
+            android:text="Quit"
+            android:onClick="quitGame"/>
 
         <Button
             android:id="@+id/returntogame"
@@ -47,7 +51,8 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:background="@color/green"
-            android:text="Return to game"/>
+            android:text="Return to game"
+            android:onClick="returnToGame"/>
 
     </LinearLayout>
 
