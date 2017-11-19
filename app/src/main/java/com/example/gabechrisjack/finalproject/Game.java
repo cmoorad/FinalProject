@@ -95,6 +95,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
     public List<LatLng> riverpoly;
     public List<LatLng> urbanpoly;
     public List<LatLng> forestpoly;
+    public boolean gameFinished = false;
 
     private GoogleMap mMap;
     private boolean permCheck = false;
@@ -121,17 +122,10 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
         Bundle extras = i.getExtras();
         if (extras != null) {
-            if (extras.containsKey("gametype")) {
-                String type = i.getStringExtra("gametype");
-                boolean success = i.getExtras().getBoolean("success");
-                if (type == "river") {
-                    riversuccess = success;
-                } else if (type == "forest") {
-                    forestsuccess = success;
-                } else if (type == "urban") {
-                    urbansuccess = success;
-                }
-            }
+            if (extras.containsKey("rivergame")) riversuccess = i.getExtras().getBoolean("rivergame");
+            if (extras.containsKey("urbangame")) urbansuccess = i.getExtras().getBoolean("urbangame");
+            if (extras.containsKey("forestgame")) forestsuccess = i.getExtras().getBoolean("urbangame");
+            if (extras.containsKey("gameFinished")) gameFinished = true;
         }
 
         checkPermissions();
@@ -145,13 +139,12 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
             Toast.makeText(this, "GPS permission FAILED", Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(this, "GPS permission OK", Toast.LENGTH_LONG).show();
-
             mgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             mgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 5f, this);
         }
 
         //Check to see if complete game success
-        if (riversuccess && forestsuccess && urbansuccess) {
+        if (riversuccess && forestsuccess && urbansuccess && !gameFinished) {
             gameSuccess();
         }
 
@@ -214,36 +207,33 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         //handles welcome message
         String comp = getNumberGamesCompleted();
         TextView openingmsg = view.findViewById(R.id.userscore);
-        openingmsg.setText(user1 + ", you have completed" + comp + " out of 3 minigames!");
+        openingmsg.setText(user1 + ", you have completed " + comp + " out of 3 minigames!");
 
-
-
-        //THE WAY THESE ARE CREATED SHOULD BE ACCESSIBLE LATER
+        //DRAW RIVER POLYGON
         riverpoly = new ArrayList<LatLng>();
         riverpoly.add(new LatLng(43.710714, -72.290854));
         riverpoly.add(new LatLng(43.703548, -72.298322));
         riverpoly.add(new LatLng(43.704448, -72.301755));
         riverpoly.add(new LatLng(43.712544, -72.292786));
 
-        //DRAW RIVER POLYGON
         Polygon polygon = mMap.addPolygon( new PolygonOptions()
             .addAll(riverpoly)
             .strokeColor(Color.BLUE)
             .fillColor(getColor(R.color.transblue)));
 
-
+        //DRAW URBAN POLYGON
         urbanpoly = new ArrayList<LatLng>();
         urbanpoly.add(new LatLng(43.705907, -72.288247));
         urbanpoly.add(new LatLng(43.704853, -72.288172));
         urbanpoly.add(new LatLng(43.704853, -72.289438));
         urbanpoly.add(new LatLng(43.706000, -72.289481));
 
-
         Polygon polygon1 = mMap.addPolygon( new PolygonOptions()
             .addAll(urbanpoly)
             .strokeColor(Color.BLACK)
             .fillColor(getColor(R.color.transgrey)));
 
+        //DRAW FOREST POLYGON
         forestpoly = new ArrayList<LatLng>();
         forestpoly.add(new LatLng(43.707711, -72.283280));
         forestpoly.add(new LatLng(43.704640, -72.283709));
@@ -255,7 +245,6 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
                 .addAll(forestpoly)
                 .strokeColor(Color.GREEN)
                 .fillColor(getColor(R.color.transgreen)));
-
     }
 
     //checks number of games completed so far
@@ -277,134 +266,39 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
     }
 
-    //post method = for example purposes
-    /**
-    //support methods for post - error caught or draw the cat markers
-    private void postPetResults(final String res){
-        dl.post(new Runnable() {
-            @Override
-            public void run() {
-                if(res.contains("ERROR")) {
-                    if (res.contains("NO_ID")) {
-                        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ctx);
-                        dlgAlert.setTitle("Whoops!");
-                        dlgAlert.setPositiveButton("OK", null);
-                        dlgAlert.setCancelable(true);
-                        dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-                        dlgAlert.setMessage("Please select a cat");
-                        dlgAlert.create().show();
-                    }
-                    else {
-                        Log.d("RESPONSE", res);
-                        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ctx);
-                        dlgAlert.setTitle("Uh oh...");
-                        dlgAlert.setPositiveButton("OK", null);
-                        dlgAlert.setCancelable(true);
-                        dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-                        dlgAlert.setMessage("Cat is too far to be petted!");
-                        dlgAlert.create().show();
-                    }
-                }
-                else {
-                    Log.d("GOT CATPET RESPONSE", res);
-
-                    AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ctx);
-                    dlgAlert.setTitle("Congrats!");
-                    dlgAlert.setPositiveButton("OK", null);
-                    dlgAlert.setCancelable(true);
-                    dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    });
-                    dlgAlert.setMessage("You pet the cat!");
-                    dlgAlert.create().show();
-
-                    checkAllPetted();
-
-                    if (allpetted) {
-                        Intent myIntent = new Intent(Game.this, Success.class);
-                        myIntent.putExtra("user", user1);
-                        myIntent.putExtra("pass", pass1);
-                        startActivity(myIntent);
-                    }
-                }
-
-            }
-        });
-    }
-    */
-
-    //distance support method = for example
-    public String CalculationByDistance(LatLng StartP, LatLng EndP) {
-        int Radius = 6371;// radius of earth in Km
-        double lat1 = StartP.latitude;
-        double lat2 = EndP.latitude;
-        double lon1 = StartP.longitude;
-        double lon2 = EndP.longitude;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
-                * Math.sin(dLon / 2);
-        double c = 2 * Math.asin(Math.sqrt(a));
-        double valueResult = Radius * c;
-        double km = valueResult;
-        double meter = valueResult*1000;
-
-        Log.d("METERS AWAY", String.valueOf(meter));
-
-        if (km <= .1) {
-            String meterstring = String.valueOf(meter);
-            String actualmeters = meterstring.substring(0,2) + " meters";
-            return actualmeters;
-        }
-        else {
-            String kmstring = String.valueOf(km);
-            String actualkm = kmstring.substring(0,3) + " kilometeres";
-            return actualkm;
-        }
-
-    }
-
     public void playMinigame(View v) {
-
-        Double lat = loc.latitude;
-        Double lng = loc.longitude;
-
-        //LNGS ARE NEGATIVE!!!
 
         boolean inriver = PolyUtil.containsLocation(loc, riverpoly, false);
         boolean inurban = PolyUtil.containsLocation(loc, urbanpoly, false);
         boolean inforest = PolyUtil.containsLocation(loc, forestpoly, false);
 
         if (inriver) {
-            Log.d("AYYYY LET'S GOOO", "we did it");
             Intent myIntent = new Intent(this, GameComplete.class);
             myIntent.putExtra("user", user1);
             myIntent.putExtra("pass", pass1);
+            myIntent.putExtra("rivergame", riversuccess);
+            myIntent.putExtra("urbangame", urbansuccess);
+            myIntent.putExtra("forestgame", forestsuccess);
             startActivity(myIntent);
         }
 
         else if (inurban) {
-            Log.d("AYYYY LET'S GOOO", "we did it");
             Intent myIntent = new Intent(this, GameComplete.class);
             myIntent.putExtra("user", user1);
             myIntent.putExtra("pass", pass1);
+            myIntent.putExtra("rivergame", riversuccess);
+            myIntent.putExtra("urbangame", urbansuccess);
+            myIntent.putExtra("forestgame", forestsuccess);
             startActivity(myIntent);
         }
 
         else if (inforest) {
-            Log.d("AYYYY LET'S GOOO", "we did it");
             Intent myIntent = new Intent(this, GameComplete.class);
             myIntent.putExtra("user", user1);
             myIntent.putExtra("pass", pass1);
+            myIntent.putExtra("rivergame", riversuccess);
+            myIntent.putExtra("urbangame", urbansuccess);
+            myIntent.putExtra("forestgame", forestsuccess);
             startActivity(myIntent);
         }
 
@@ -436,6 +330,9 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         Intent myIntent = new Intent(this, MainActivity.class);
         myIntent.putExtra("user", user1);
         myIntent.putExtra("pass", pass1);
+        myIntent.putExtra("rivergame", riversuccess);
+        myIntent.putExtra("urbangame", urbansuccess);
+        myIntent.putExtra("forestgame", forestsuccess);
         startActivity(myIntent);
     }
 
@@ -443,6 +340,10 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         riversuccess = false;
         forestsuccess = false;
         urbansuccess = false;
+        gameFinished = false;
+        String comp = getNumberGamesCompleted();
+        TextView openingmsg = view.findViewById(R.id.userscore);
+        openingmsg.setText(user1 + ", you have completed " + comp + " out of 3 minigames!");
     }
 
     //following three are required methods for api

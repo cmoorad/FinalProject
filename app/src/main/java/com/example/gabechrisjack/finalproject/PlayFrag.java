@@ -25,6 +25,9 @@ public class PlayFrag extends Fragment {
         TextView usernametext = v.findViewById(R.id.hiuser);
         final String userholder = ((MainActivity)getActivity()).user1;
         final String passholder = ((MainActivity)getActivity()).pass1;
+        final boolean rivergame = ((MainActivity)getActivity()).rivergame;
+        final boolean urbangame = ((MainActivity)getActivity()).urbangame;
+        final boolean forestgame = ((MainActivity)getActivity()).forestgame;
 
         //handles play button activity pointer
         Button playbutton = v.findViewById(R.id.playButton);
@@ -34,6 +37,9 @@ public class PlayFrag extends Fragment {
                 Intent myIntent = new Intent(getActivity(), Game.class);
                 myIntent.putExtra("user", userholder);
                 myIntent.putExtra("pass", passholder);
+                myIntent.putExtra("rivergame", rivergame);
+                myIntent.putExtra("urbangame", urbangame);
+                myIntent.putExtra("forestgame", forestgame);
                 startActivity(myIntent);
             }
         });

@@ -34,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
 
     public String user1;
     public String pass1;
+    public boolean rivergame = false;
+    public boolean urbangame = false;
+    public boolean forestgame = false;
+
     private static final int MY_PERMISSIONS_REQUEST = 301;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -48,6 +52,13 @@ public class MainActivity extends AppCompatActivity {
         Intent i = getIntent();
         user1 =  i.getStringExtra("user");
         pass1 = i.getStringExtra("pass");
+
+        Bundle extras = i.getExtras();
+        if (extras != null) {
+            if (extras.containsKey("rivergame")) rivergame = i.getExtras().getBoolean("rivergame");
+            if (extras.containsKey("urbangame")) urbangame = i.getExtras().getBoolean("urbangame");
+            if (extras.containsKey("forestgame")) forestgame = i.getExtras().getBoolean("forestgame");
+        }
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

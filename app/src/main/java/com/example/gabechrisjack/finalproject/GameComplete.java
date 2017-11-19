@@ -43,6 +43,9 @@ public class GameComplete extends AppCompatActivity {
         Intent myIntent = new Intent(this, MainActivity.class);
         myIntent.putExtra("user", user);
         myIntent.putExtra("pass", pass);
+        myIntent.putExtra("rivergame", true);
+        myIntent.putExtra("urbangame", true);
+        myIntent.putExtra("forestgame", true);
         startActivity(myIntent);
     }
 
@@ -50,6 +53,10 @@ public class GameComplete extends AppCompatActivity {
         Intent myIntent = new Intent(this, Game.class);
         myIntent.putExtra("user", user);
         myIntent.putExtra("pass", pass);
+        myIntent.putExtra("rivergame", true);
+        myIntent.putExtra("urbangame", true);
+        myIntent.putExtra("forestgame", true);
+        myIntent.putExtra("gameFinished", true);
         startActivity(myIntent);
     }
 
