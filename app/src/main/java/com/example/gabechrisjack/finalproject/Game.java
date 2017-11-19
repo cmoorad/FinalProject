@@ -120,6 +120,10 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         user1 = i.getStringExtra("user");
         pass1 = i.getStringExtra("pass");
 
+        //grabs successes from intent (including whether game has been finished yet or not)
+
+        //NOTE: intentionally, there is no "gameFinished" boolean passed from the play fragment, so
+        //if the user leaves the game and comes back, they'll be reminded they've finished already
         Bundle extras = i.getExtras();
         if (extras != null) {
             if (extras.containsKey("rivergame")) riversuccess = i.getExtras().getBoolean("rivergame");
@@ -266,12 +270,15 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
     }
 
+    //call respective (zone-based) minigame to play
     public void playMinigame(View v) {
 
+        //check which zone you're in if any
         boolean inriver = PolyUtil.containsLocation(loc, riverpoly, false);
         boolean inurban = PolyUtil.containsLocation(loc, urbanpoly, false);
         boolean inforest = PolyUtil.containsLocation(loc, forestpoly, false);
 
+        //call game based on zone
         if (inriver) {
             Intent myIntent = new Intent(this, GameComplete.class);
             myIntent.putExtra("user", user1);
@@ -302,6 +309,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
             startActivity(myIntent);
         }
 
+        //if you're not in a game zone, tell user
         else {
 
             AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
@@ -319,6 +327,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
     }
 
+    //starts game complete activity if all minigames are won
     public void gameSuccess() {
         Intent myIntent = new Intent(this, GameComplete.class);
         myIntent.putExtra("user", user1);
@@ -326,6 +335,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         startActivity(myIntent);
     }
 
+    //leaves game
     public void quitClicked(View v) {
         Intent myIntent = new Intent(this, MainActivity.class);
         myIntent.putExtra("user", user1);
@@ -336,6 +346,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         startActivity(myIntent);
     }
 
+    //resets all minigames to incomplete
     public void resetGames(View v) {
         riversuccess = false;
         forestsuccess = false;

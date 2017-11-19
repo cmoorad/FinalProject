@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         user1 =  i.getStringExtra("user");
         pass1 = i.getStringExtra("pass");
 
+        //pulls success extras
         Bundle extras = i.getExtras();
         if (extras != null) {
             if (extras.containsKey("rivergame")) rivergame = i.getExtras().getBoolean("rivergame");
@@ -69,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("Tab 1"));
         tabLayout.addTab(tabLayout.newTab().setText("Tab 2"));
         tabLayout.addTab(tabLayout.newTab().setText("Tab 3"));
-        tabLayout.addTab(tabLayout.newTab().setText("Tab 4"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         //add tabs to adapter to concatenate view
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         final FragmentPagerAdapter adapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public int getCount() {
-                return 4;
+                return 3;
             }
 
             @Override
@@ -90,11 +90,8 @@ public class MainActivity extends AppCompatActivity {
                         history_Frag tab2 = new history_Frag();
                         return tab2;
                     case 2:
-                        ranking_Frag tab3 = new ranking_Frag();
+                        preferences_Frag tab3 = new preferences_Frag();
                         return tab3;
-                    case 3:
-                        preferences_Frag tab4 = new preferences_Frag();
-                        return tab4;
 
                     default:
                         return null;
@@ -110,8 +107,6 @@ public class MainActivity extends AppCompatActivity {
                     case 1:
                         return "History";
                     case 2:
-                        return "Ranking";
-                    case 3:
                         return "Settings";
                     default:
                         return "Settings";

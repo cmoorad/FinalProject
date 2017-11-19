@@ -22,6 +22,7 @@ public class PlayFrag extends Fragment {
 
         View v = inflater.inflate(R.layout.play_frag, container, false);
 
+        //pulls info passed from intent in main activity
         TextView usernametext = v.findViewById(R.id.hiuser);
         final String userholder = ((MainActivity)getActivity()).user1;
         final String passholder = ((MainActivity)getActivity()).pass1;
@@ -35,6 +36,7 @@ public class PlayFrag extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent myIntent = new Intent(getActivity(), Game.class);
+                //pass all relevant info back into game
                 myIntent.putExtra("user", userholder);
                 myIntent.putExtra("pass", passholder);
                 myIntent.putExtra("rivergame", rivergame);

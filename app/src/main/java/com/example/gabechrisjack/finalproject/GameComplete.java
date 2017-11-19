@@ -39,6 +39,7 @@ public class GameComplete extends AppCompatActivity {
         congrats.setText("Congratulations " + user + "!");
     }
 
+    //quits the game, passing out all game info to main activity
     public void quitGame(View v) {
         Intent myIntent = new Intent(this, MainActivity.class);
         myIntent.putExtra("user", user);
@@ -49,6 +50,9 @@ public class GameComplete extends AppCompatActivity {
         startActivity(myIntent);
     }
 
+    //returns to the game, passing game info back to the game
+    //NOTE: this time we do pass the gameFinished boolean so that we don't come back to the
+    //game complete activity every time we start the game
     public void returnToGame(View v) {
         Intent myIntent = new Intent(this, Game.class);
         myIntent.putExtra("user", user);
@@ -60,7 +64,7 @@ public class GameComplete extends AppCompatActivity {
         startActivity(myIntent);
     }
 
-
+    //getter
     public Context getActivity() {
         return this;
     }

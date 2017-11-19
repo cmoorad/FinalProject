@@ -55,6 +55,7 @@ public class history_Frag extends Fragment {
         boolean urbangame = ((MainActivity)getActivity()).urbangame;
         boolean forestgame = ((MainActivity)getActivity()).forestgame;
 
+        //set success checkmarks/red x based on minigame success
         successSet(v, rivergame, R.id.rivergame);
         successSet(v, urbangame, R.id.urbangame);
         successSet(v, forestgame, R.id.forestgame);
@@ -62,6 +63,7 @@ public class history_Frag extends Fragment {
         return v;
     }
 
+    //support method for setting success checkmark or not based on minigame successes
     public void successSet(View v, boolean b, int id) {
         ImageView img = v.findViewById(id);
         if (b) {
