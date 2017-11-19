@@ -48,6 +48,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.maps.android.PolyUtil;
+
 
 import android.Manifest;
 import android.content.Context;
@@ -68,44 +70,22 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.LongToIntFunction;
 
 /**
- * Created by team JCOG (Chris Moorad and Jack Taylor) on 11/6/17.
+ * Created by Chris Moorad on 11/11/17.
  */
 
-
-//Lab 4 Summary - Team JCOG
-/**
-
-History Fragment: Our history fragment is fully functional, and updates appropriately.
-
-Notification + Tracking : We went with an updating silent notification for when you are far away
-from the cat, and a sounds notification when you are close to the cat (within 100 meters) rather
-than a notification bar. Excluding this slight change, the tracking component is fully functional :)
-
-Map Fragment: We successfully added the two buttons, distinguishing between petting and tracking
-
-Camera Function:
-
-Tab Change: We removed the ranking fragment from the tab layout
-
-*/
 
 public class Game extends AppCompatActivity implements OnMapReadyCallback, LocationListener {
 
     //Variable declarations
     public String user1;
     public String pass1;
-    public Bitmap image;
-    public JSONArray pubcat;
     public View view;
-    public String caturl;
-    public String currid;
-    public boolean allpetted = false;
-    public boolean tracking = false;
-    public double trackingDistance;
+
 
     //new game
     public boolean riversuccess = false;
@@ -117,13 +97,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
     private LocationManager mgr;
     private LatLng loc;
     private SupportMapFragment mapFragment;
-    private static final int MY_PERMISSIONS_REQUEST = 301;
     private Marker current;
-
-    private String req;
-    private Handler dl;
-    private Activity ctx;
-    RequestQueue queue;
 
     public Game() {
     }
@@ -156,18 +130,10 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
             }
         }
 
-
-        dl = new Handler();
-        ctx = this;
-        queue = Volley.newRequestQueue(this);
-
         checkPermissions();
-
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
         permCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
         //notify user if GPS permission doesn't go through
@@ -179,9 +145,6 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
             mgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             mgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 5f, this);
         }
-
-        //get all the cats for the map
-        getCats(mapFragment.getView());
 
         //Check to see if complete game success
         if (riversuccess && forestsuccess && urbansuccess) {
@@ -195,10 +158,6 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
     @Override
     public void onLocationChanged(Location location) {
 
-        if (tracking) {
-            getTracking();
-        }
-
         Log.d("LOCATION", "CHANGED: " + location.getLatitude() + " " + location.getLongitude());
 
         loc = new LatLng(location.getLatitude(), location.getLongitude());
@@ -207,9 +166,10 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
         current = mMap.addMarker(new MarkerOptions().position(loc).title("Current Location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
+
     }
 
-    //SETS UP THE MAP INITIALLY, WITH APPROPRIATE ZOOM AND CATS
+    //SETS UP THE MAP INITIALLY, WITH APPROPRIATE ZOOM AND POLYGONS
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -246,33 +206,37 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         mMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(16f)); // buildings-level
 
-        //int comp = getNumberGamesCompleted();
+        //handles welcome message
+        String comp = getNumberGamesCompleted();
         TextView openingmsg = view.findViewById(R.id.userscore);
-        openingmsg.setText(user1 + ", you have completed" /*+ comp*/ + " out of 3 minigames!");
+        openingmsg.setText(user1 + ", you have completed" + comp + " out of 3 minigames!");
 
 
 
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng point) {
-                turnTrackingOff();
-                currid = null;
-            }
-        });
-
+        //THE WAY THESE ARE CREATED SHOULD BE ACCESSIBLE LATER
+        List<LatLng> riverpoly = PolyUtil.decode("riverpoly");
 
         //DRAW RIVER POLYGON
         Polygon polygon = mMap.addPolygon( new PolygonOptions()
+            .addAll(riverpoly)
             .add(new LatLng(43.710714, -72.290854), new LatLng(43.703548, -72.298322),
                     new LatLng(43.704448, -72.301755), new LatLng(43.712544, -72.292786))
             .strokeColor(Color.BLUE)
             .fillColor(Color.parseColor("#0044cc")));
 
+
+
+        //add polygon to util list
+
     }
 
-    //support method for above
-    public static LatLng fromLocationToLatLng(Location location){
-        return new LatLng(location.getLatitude(), location.getLongitude());
+    //checks number of games completed so far
+    public String getNumberGamesCompleted() {
+        int x = 0;
+        if (riversuccess) x+=1;
+        if (forestsuccess) x+=1;
+        if (urbansuccess) x+=1;
+        return Integer.toString(x);
     }
 
     //Check to ensure permissions
@@ -285,144 +249,9 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
     }
 
-    //Get catlist - request
-    public void getCats(View v){
 
-        req = buildHTML();
-
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                String url =  "http://cs65.cs.dartmouth.edu/catlist.pl?" + req;
-
-                Log.d("URL", url);
-                StringRequest req = new StringRequest (Request.Method.GET, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String res) {
-                                postResultsToUI(res);
-                            }
-                        }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("THE ERROR", error.toString());
-                        postResultsToUI("error" + error.toString());
-                    }
-                });
-
-
-                // Add the request to the RequestQueue.
-                queue.add(req);
-            }
-        }).start();
-    }
-
-    // builds string for retrieving cat list
-    private String buildHTML(){
-
-        String s = "name=" + user1 + "&password=" + pass1 + "&mode=easy";
-
-        return s;
-    }
-
-    //support methods for post - error caught or draw the cat markers
-    private void postResultsToUI(final String res){
-        dl.post(new Runnable() {
-            @Override
-            public void run() {
-                if(res.contains("error")) {
-                    AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ctx);
-                    dlgAlert.setTitle("Error Message...");
-                    dlgAlert.setPositiveButton("OK", null);
-                    dlgAlert.setCancelable(true);
-                    dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    });
-                    dlgAlert.setMessage("Could not connect to server");
-                    dlgAlert.create().show();
-                }
-                else {
-                    Log.d("GOT CATLIST", res);
-                    drawCats(res);
-                }
-
-            }
-        });
-    }
-
-    //success support method
-    private void checkAllPetted() {
-
-        Boolean all = true;
-
-        try {
-
-            for (int i = 0; i < pubcat.length(); i++) {
-
-                JSONObject cat = pubcat.getJSONObject(i);
-                String pettedtf = cat.get("petted").toString();
-                Boolean petted = Boolean.valueOf(pettedtf);
-
-                if (!petted) {
-                    all = false;
-                }
-            }
-
-            if (all) {
-                allpetted = true;
-            }
-
-        }
-        catch (JSONException je) {
-                Log.d("Error", "JSON CREATION ERROR");
-            }
-
-
-    }
-
-    //Pet cat - request
-    public void petCat(View v){
-
-        req = buildPetHTML();
-
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                String url = "http://cs65.cs.dartmouth.edu/pat.pl?" + req;
-
-                Log.d("URL", url);
-                StringRequest req = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String res) {
-                        postPetResults(res);
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("THE ERROR", error.toString());
-                        postPetResults("ERROR" + error.toString());
-                    }
-                });
-
-
-                // Add the request to the RequestQueue.
-                queue.add(req);
-            }
-        }).start();
-
-    }
-
-    // builds string for retrieving cat list
-    private String buildPetHTML(){
-        String s = "name=" + user1 + "&password=" + pass1 + "&catid=" + currid + "&lat=" + loc.latitude + "&lng=" + loc.longitude;
-        return s;
-    }
-
+    //post method = for example purposes
+    /**
     //support methods for post - error caught or draw the cat markers
     private void postPetResults(final String res){
         dl.post(new Runnable() {
@@ -482,270 +311,9 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
             }
         });
     }
+    */
 
-
-
-    //NEW TRACKING METHODS
-
-    //The support methods are also called by user actions that trigger tracking on/off
-    //tracking off support method
-    public void turnTrackingOff() {
-        Button trackButton = view.findViewById(R.id.trackButton);
-        trackButton.setBackgroundColor(getResources().getColor(R.color.green));
-        trackButton.setText("Track");
-        if(tracking) {
-            tracking = false;
-        }
-        RemoveAllNotifications();
-        Log.d("TRACKING TURNED OFF", String.valueOf(tracking));
-    }
-
-    //tracking on support method
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    public void turnTrackingOn() {
-        Button trackButton = view.findViewById(R.id.trackButton);
-        trackButton.setBackgroundColor(getResources().getColor(R.color.red));
-        trackButton.setText("Stop");
-
-        getTracking();
-
-        if (!tracking) {
-            tracking = true;
-        }
-
-    }
-
-    //Tracking button - handles the click and calls appropriate support method
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    public void trackClicked(View v) {
-
-        //if tracking is off, turn it on
-        if (!tracking) {
-            turnTrackingOn();
-        }
-        //otherwise, turn it off
-        else {
-            turnTrackingOff();
-        }
-        Log.d("IS TRACKING ON", String.valueOf(tracking));
-
-    }
-
-    //tracking server request - called when tracking turned on or location changed
-    public void getTracking() {
-
-        req = buildPetHTML();
-
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                String url = "http://cs65.cs.dartmouth.edu/track.pl?" + req;
-
-                Log.d("URL", url);
-                StringRequest req = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String res) {
-                        postTrackResults(res);
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("THE ERROR", error.toString());
-                        postTrackResults("ERROR" + error.toString());
-                    }
-                });
-
-
-                // Add the request to the RequestQueue.
-                queue.add(req);
-            }
-        }).start();
-
-    }
-
-    //post track results method - calls notification
-    public void postTrackResults(final String res) {
-        dl.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public void run() {
-                if(res.contains("ERROR")) {
-                    if (res.contains("NO_ID") || res.contains("MISSING_ID")) {
-                        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ctx);
-                        dlgAlert.setTitle("Whoops!");
-                        dlgAlert.setPositiveButton("OK", null);
-                        dlgAlert.setCancelable(true);
-                        dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-                        dlgAlert.setMessage("Please select a cat");
-                        dlgAlert.create().show();
-                    }
-                    else if (res.contains("MISSING_LAT") || res.contains("MISSING_LNG")) {
-                        Log.d("RESPONSE", res);
-                        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ctx);
-                        dlgAlert.setTitle("Uh oh...");
-                        dlgAlert.setPositiveButton("OK", null);
-                        dlgAlert.setCancelable(true);
-                        dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-                        dlgAlert.setMessage("Something went wrong with finding your location, " +
-                                "please check your wifi connection and try again");
-                        dlgAlert.create().show();
-                    }
-                    trackClicked(view);
-                }
-                else {
-                    Log.d("Tracking on", res);
-                    try {
-                        JSONObject tracker = new JSONObject(res);
-                        trackingDistance = tracker.getDouble("distance");
-                    }
-                    catch(JSONException je) {
-                        Log.d("Error", "MARKER CLICK JSON ERROR SITUATION");
-                    }
-                    RemoveAllNotifications();
-
-                    //if the distance is close, use a close notification
-                    if (trackingDistance < 100) {
-                        String dist = String.valueOf(trackingDistance);
-                        closeNotification(dist.substring(0,2));
-                    }
-                    //otherwise, use a silent notification
-                    else {
-                        String dist = String.valueOf(trackingDistance);
-                        createAndGenerateNotification(dist.substring(0,3));
-                    }
-                }
-
-            }
-        });
-    }
-
-
-
-
-    //draws the cat markers
-    private void drawCats(String jsonString) {
-
-        try {
-            JSONArray catlist = new JSONArray(jsonString);
-            pubcat = catlist;
-
-            Log.d("CATLISTARRAY", catlist.toString());
-
-            for (int i = 0; i < catlist.length(); i++) {
-
-                JSONObject cat = catlist.getJSONObject(i);
-
-                String name = cat.get("name").toString();
-
-                Double catLat = Double.parseDouble(cat.get("lat").toString());
-                Double catLng = Double.parseDouble(cat.get("lng").toString());
-                LatLng pos = new LatLng(catLat, catLng);
-
-                Marker newmarker = mMap.addMarker(new MarkerOptions().position(pos).title(name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-
-
-                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                          @Override
-                          public boolean onMarkerClick(Marker marker) {
-                              String nameclick = marker.getTitle();
-                              Log.d("MARKER WAS CLICKED", nameclick);
-
-                              //set name in panel
-                              TextView name = view.findViewById(R.id.catname);
-                              name.setText(nameclick);
-
-                              //to calculate dist
-                              LatLng catloc = marker.getPosition();
-                              LatLng curr = loc;
-                              String distance = CalculationByDistance(catloc, curr);
-                              TextView dist = view.findViewById(R.id.catdist);
-                              dist.setText(distance);
-
-                              //iterate through json array to find correct json object
-                              for (int i = 0; i < pubcat.length(); i++) {
-                                  try {
-                                      JSONObject cat = pubcat.getJSONObject(i);
-
-                                      if (cat.get("name").toString().equals(marker.getTitle())) {
-
-                                          Log.d("CAT NAME", nameclick);
-                                          Log.d("CAT URL", cat.get("picUrl").toString());
-
-                                          if (currid ==null ) {
-                                              currid = cat.get("catId").toString();
-                                          }
-                                          else if (!currid.equals(cat.get("catId").toString())) {
-                                              //set current id
-                                              currid = cat.get("catId").toString();
-                                              turnTrackingOff();
-                                          }
-
-                                          //get catpic url
-                                          caturl = cat.get("picUrl").toString();
-
-                                          image = changeBitMap(caturl);
-
-                                          //delay before changing cat image for async task to go through
-                                          final Handler delay = new Handler();
-                                          delay.postDelayed(new Runnable() {
-                                              @Override
-                                              public void run() {
-                                                  ImageView icon = view.findViewById(R.id.catIcon);
-                                                  icon.setImageBitmap(image);
-                                              }
-                                          }, 300);
-
-
-
-                                      }
-                                  }
-                                  catch(JSONException je) {
-                                      Log.d("Error", "MARKER CLICK JSON ERROR SITUATION");
-                                  }
-                              }
-                              return false;
-                          }
-                      });
-            }
-
-        } catch(JSONException je) {
-            Log.d("Error", "JSON CREATION ERROR");
-        }
-
-    }
-
-    //support method to get cat image from url
-    protected Bitmap changeBitMap(String urlstring) {
-        //Bitmap Icon = null;
-
-        caturl = urlstring;
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL(caturl);
-                    image = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                } catch(MalformedURLException e) {
-                    Log.d("MALFORMED URL", "DAMNIT");
-
-                } catch(IOException e) {
-                    Log.d("URL IO Exception", "YEP");
-                }
-            }
-        }).start();
-        return image;
-    }
-
-    //distance support method
+    //distance support method = for example
     public String CalculationByDistance(LatLng StartP, LatLng EndP) {
         int Radius = 6371;// radius of earth in Km
         double lat1 = StartP.latitude;
@@ -799,75 +367,28 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
 
 
-    //NEW NOTIFICATION METHODS
-    //Creates a silent notification if the cat is far away
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    public void createAndGenerateNotification(String trackingdist) {
+    public void playMinigame() {
 
-        Intent intent = new Intent();
-        PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder b = new NotificationCompat.Builder(ctx);
-
-        b.setAutoCancel(true)
-                //.setDefaults(Notification.DEFAULT_ALL)
-                //.setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.red_marker)
-                .setContentTitle("Tracking")
-                .setContentText("Cat is " + trackingdist + " meters away")
-                .setContentIntent(contentIntent);
-
-
-        NotificationManager notificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, b.build());
-
-    }
-
-    //Creates a sound notification if the cat is nearby
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    public void closeNotification(String trackingdist) {
-
-        Intent intent = new Intent();
-        PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder b = new NotificationCompat.Builder(ctx);
-
-        b.setAutoCancel(true)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.red_marker)
-                .setContentTitle("Tracking")
-                .setContentText("Cat is close! Only " + trackingdist + " meters away!")
-                .setContentIntent(contentIntent);
-
-
-        NotificationManager notificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, b.build());
-
-    }
-
-    //Removes all notifications
-    public void RemoveAllNotifications() {
-
-        NotificationManager mNotificationManager
-                = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        try {
-            mNotificationManager.cancelAll();
-        }
-        catch (Exception e) {
-            Log.d("POINTER EXCEPTION", e.toString());
-        }
     }
 
 
     /*
+    public static boolean containsLocation(LatLng point, java.util.List polygon, boolean geodesic) {
+        super
+    }
+    */
+
+
+
+
     public void inGameZone(LatLng currentlocation) {
 
         Double lat = currentlocation.latitude;
         Double lng = currentlocation.longitude;
 
         //LNGS ARE NEGATIVE!!!
+
+        boolean inpoly = PolyUtil.containsLocation(currentlocation, java.util.List<LatLng> riverpoly, false);
 
         //RIVER GAME
         if ((bottom < lat && lat < top) && (left < lng && lng < right)) {
@@ -893,6 +414,18 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
 
         else {
+
+            AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
+            dlgAlert.setTitle("Whoops!");
+            dlgAlert.setPositiveButton("OK", null);
+            dlgAlert.setCancelable(true);
+            dlgAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            dlgAlert.setMessage("You need to be in one of the minigame territories before " +
+                    "you can play a minigame!");
+            dlgAlert.create().show();
 
         }
 

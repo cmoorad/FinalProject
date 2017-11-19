@@ -49,6 +49,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/green"
                 android:layout_gravity="center"
+                android:onClick="playMinigame"
                 android:text="Play Minigame"/>
 
 
