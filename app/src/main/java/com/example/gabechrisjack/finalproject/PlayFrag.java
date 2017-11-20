@@ -22,6 +22,8 @@ public class PlayFrag extends Fragment {
 
         View v = inflater.inflate(R.layout.play_frag, container, false);
 
+
+
         //pulls info passed from intent in main activity
         TextView usernametext = v.findViewById(R.id.hiuser);
         final String userholder = ((MainActivity)getActivity()).user1;

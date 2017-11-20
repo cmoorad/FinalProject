@@ -43,7 +43,7 @@ public class Lumberjack {
         minX = 0;
 
         //initializing rect object
-        detectCollision =  new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());
+        detectCollision =  new Rect();
     }
 
     // set move up true

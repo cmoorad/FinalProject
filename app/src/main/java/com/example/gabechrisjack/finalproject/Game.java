@@ -129,6 +129,8 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
             if (extras.containsKey("rivergame")) riversuccess = i.getExtras().getBoolean("rivergame");
             if (extras.containsKey("urbangame")) urbansuccess = i.getExtras().getBoolean("urbangame");
             if (extras.containsKey("forestgame")) forestsuccess = i.getExtras().getBoolean("urbangame");
+
+            // where is "gameFinished" added to extras?
             if (extras.containsKey("gameFinished")) gameFinished = true;
         }
 
@@ -148,7 +150,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
 
         //Check to see if complete game success
-        if (riversuccess && forestsuccess && urbansuccess && !gameFinished) {
+        if (riversuccess && forestsuccess && urbansuccess && gameFinished) {
             gameSuccess();
         }
 
@@ -161,7 +163,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
 
         Log.d("LOCATION", "CHANGED: " + location.getLatitude() + " " + location.getLongitude());
 
-        loc = new LatLng(location.getLatitude(), location.getLongitude());
+        loc = new LatLng(43.706521, -72.284959);
 
         current.remove();
 
@@ -300,7 +302,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
 
         else if (inforest) {
-            Intent myIntent = new Intent(this, GameComplete.class);
+            Intent myIntent = new Intent(this, ForestGameActivity.class);
             myIntent.putExtra("user", user1);
             myIntent.putExtra("pass", pass1);
             myIntent.putExtra("rivergame", riversuccess);

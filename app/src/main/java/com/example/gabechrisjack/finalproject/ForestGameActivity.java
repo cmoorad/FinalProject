@@ -17,11 +17,12 @@ import android.view.Display;
 
 public class ForestGameActivity extends AppCompatActivity {
 
-    public String user;
-    public String pass;
-    public boolean rivergame = false;
-    public boolean urbangame = false;
-    public boolean forestgame = false;
+    public static String user;
+    public static String pass;
+    public static boolean rivergame = false;
+    public static boolean urbangame = false;
+    public static boolean forestgame = false;
+    public Bundle extras;
 
     //declaring gameview
     private ForestGameView gameView;
@@ -48,35 +49,16 @@ public class ForestGameActivity extends AppCompatActivity {
         user =  i.getStringExtra("user");
         pass = i.getStringExtra("pass");
 
-        Bundle extras = i.getExtras();
+        extras = i.getExtras();
         if (extras != null) {
             if (extras.containsKey("rivergame")) rivergame = i.getExtras().getBoolean("rivergame");
             if (extras.containsKey("urbangame")) urbangame = i.getExtras().getBoolean("urbangame");
             if (extras.containsKey("forestgame")) forestgame = i.getExtras().getBoolean("forestgame");
         }
+    }
 
-        if (gameView.isGameOver) {
-            this.onStop();
-            Intent myIntent = new Intent(this, Game.class);
-            myIntent.putExtra("user", user);
-            myIntent.putExtra("pass", pass);
-            myIntent.putExtra("rivergame", rivergame);
-            myIntent.putExtra("urbangame", urbangame);
-            myIntent.putExtra("forestgame", forestgame);
-            startActivity(myIntent);
-        }
-
-        if (gameView.score > 1000) {
-            this.onStop();
-            Intent myIntent = new Intent(this, Game.class);
-            myIntent.putExtra("user", user);
-            myIntent.putExtra("pass", pass);
-            myIntent.putExtra("rivergame", rivergame);
-            myIntent.putExtra("urbangame", urbangame);
-            myIntent.putExtra("forestgame", true);
-            startActivity(myIntent);
-        }
-
+    public Bundle getExtras(){
+        return extras;
     }
 
     //pausing the game when activity is paused

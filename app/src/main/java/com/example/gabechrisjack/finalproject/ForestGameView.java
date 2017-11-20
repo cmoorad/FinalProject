@@ -20,6 +20,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -57,17 +58,13 @@ public class ForestGameView extends SurfaceView implements Runnable {
     //indicator that the enemy has just entered the game screen
     boolean flag ;
 
-    //an indicator if the game is Over
-    public boolean isGameOver ;
+    //an indicator if the game is over or won
+    public boolean isGameOver;
+    public boolean isGameWon;
+
 
     //the score holder
     public int score;
-
-    //the high Scores Holder
-    int highScore[] = new int[4];
-
-    //Shared Preferences to store the High Scores
-    SharedPreferences sharedPreferences;
 
     // media jack objects for background music
     static MediaPlayer gameOnsound;
@@ -79,6 +76,8 @@ public class ForestGameView extends SurfaceView implements Runnable {
 
     Bitmap bitmap;
 
+    Bundle extras;
+
     public ForestGameView(Context context, int screenX, int screenY) {
         super(context);
         jack = new Lumberjack(context, screenX, screenY);
@@ -88,13 +87,13 @@ public class ForestGameView extends SurfaceView implements Runnable {
 
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.woodland);
 
-        //single enemy initialization
+        //BigPine initialization
         bigPines = new BigPine(context, screenX, screenY);
 
         //initializing boom object
         boom = new Boom(context);
 
-        //initializing the LittlePine class object
+        //LittlePine initialization
         littlepines = new LittlePine(context, screenX, screenY);
 
         this.screenX = screenX;
@@ -106,14 +105,6 @@ public class ForestGameView extends SurfaceView implements Runnable {
         //setting the score to 0 initially
         score = 0;
 
-        sharedPreferences = context.getSharedPreferences("SHAR_PREF_NAME",Context.MODE_PRIVATE);
-
-//initializing the array high scores with the previous values
-        highScore[0] = sharedPreferences.getInt("score1",0);
-        highScore[1] = sharedPreferences.getInt("score2",0);
-        highScore[2] = sharedPreferences.getInt("score3",0);
-        highScore[3] = sharedPreferences.getInt("score4",0);
-
         //initializing the media jacks for the game sounds
         gameOnsound = MediaPlayer.create(context,R.raw.gameon);
         killedEnemysound = MediaPlayer.create(context,R.raw.killedenemy);
@@ -121,6 +112,13 @@ public class ForestGameView extends SurfaceView implements Runnable {
 
         //starting the game music as the game starts
         gameOnsound.start();
+
+        /*
+        extras.putString("user", ForestGameActivity.user);
+        extras.putString("pass", ForestGameActivity.pass);
+        extras.putBoolean("rivergame", ForestGameActivity.rivergame);
+        extras.putBoolean("urbangame", ForestGameActivity.urbangame);
+        */
 
         //initializing context
         this.context = context;
@@ -140,6 +138,10 @@ public class ForestGameView extends SurfaceView implements Runnable {
     private void update() {
         //incrementing score as time passes
         score++;
+
+        if (score > 1000) {
+            isGameWon = true;
+        }
 
         jack.update();
 
@@ -188,26 +190,6 @@ public class ForestGameView extends SurfaceView implements Runnable {
                         gameOnsound.stop();
                         //play the game over sound
                         gameOversound.start();
-
-                        //Assigning the scores to the highscore integer array
-                        for(int i=0;i<4;i++){
-                            if(highScore[i]<score){
-
-                                final int finalI = i;
-                                highScore[i] = score;
-                                break;
-                            }
-                        }
-
-                        //storing the scores through shared Preferences
-                        SharedPreferences.Editor e = sharedPreferences.edit();
-
-                        for(int i=0;i<4;i++){
-
-                            int j = i+1;
-                            e.putInt("score"+j,highScore[i]);
-                        }
-                        e.apply();
                     }
                 }
             }
@@ -231,26 +213,6 @@ public class ForestGameView extends SurfaceView implements Runnable {
             gameOnsound.stop();
             //play the game over sound
             gameOversound.start();
-
-            //Assigning the scores to the highscore integer array
-            for(int i=0;i<4;i++){
-
-                if(highScore[i]<score){
-
-                    final int finalI = i;
-                    highScore[i] = score;
-                    break;
-                }
-            }
-            //storing the scores through shared Preferences
-            SharedPreferences.Editor e = sharedPreferences.edit();
-
-            for(int i=0;i<4;i++){
-
-                int j = i+1;
-                e.putInt("score"+j,highScore[i]);
-            }
-            e.apply();
         }
     }
 
@@ -309,6 +271,14 @@ public class ForestGameView extends SurfaceView implements Runnable {
                 canvas.drawText("Game Over",canvas.getWidth()/2,yPos,paint);
             }
 
+            if(isGameWon) {
+                paint.setTextSize(150);
+                paint.setTextAlign(Paint.Align.CENTER);
+
+                int yPos=(int) ((canvas.getHeight() / 2) - ((paint.descent() + paint.ascent()) / 2));
+                canvas.drawText("Game Won!",canvas.getWidth()/2,yPos,paint);
+            }
+
             surfaceHolder.unlockCanvasAndPost(canvas);
 
         }
@@ -361,7 +331,25 @@ public class ForestGameView extends SurfaceView implements Runnable {
         //if the game's over, tappin on game Over screen sends you to MainActivity
         if(isGameOver){
             if(motionEvent.getAction()==MotionEvent.ACTION_DOWN){
-                context.startActivity(new Intent(context,MainActivity.class));
+                Intent myIntent = new Intent(context, Game.class);
+                myIntent.putExtra("user", ForestGameActivity.user);
+                myIntent.putExtra("pass", ForestGameActivity.pass);
+                myIntent.putExtra("rivergame", ForestGameActivity.rivergame);
+                myIntent.putExtra("urbangame", ForestGameActivity.urbangame);
+                myIntent.putExtra("forestgame", ForestGameActivity.forestgame);
+                context.startActivity(myIntent);
+            }
+        }
+
+        if (isGameWon) {
+            if(motionEvent.getAction()==MotionEvent.ACTION_DOWN){
+                Intent myIntent = new Intent(context, Game.class);
+                myIntent.putExtra("user", ForestGameActivity.user);
+                myIntent.putExtra("pass", ForestGameActivity.pass);
+                myIntent.putExtra("rivergame", ForestGameActivity.rivergame);
+                myIntent.putExtra("urbangame", ForestGameActivity.urbangame);
+                myIntent.putExtra("forestgame", true);
+                context.startActivity(myIntent);
             }
         }
         return true;
