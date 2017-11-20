@@ -27,6 +27,12 @@ Carried over from previous labs in the course, the game on the whole requires si
 
 MiniGame Overviews:
 
+-Forest Game: The forest game features a logger that has to cut trees before they fall through the bottom of the screen. Here, we introduce sound effects (new to the course). The game serves as a reminder not to cut down young trees, as this ruins the forest. The game is complete after a given time limit, or failed if the logger cuts down young trees or misses an old tree. The forest mini-game is based on its own activity (ForestGameActivity) which uses a custom view class (ForestGameView) to display graphics. Each “character” in the game is represented by its own class. The user’s character in this game is a lumberjack, who must navigate through the forest and cut down tall, old trees while avoiding small, young trees. Each character class contains a method getDetectCollision that determines if the user’s character has collided with any of the tree characters.
+
+-Library Game: The library game features several text boxes and requires that the user create palindromes in every direction: left to right, top to bottom, and diagonal. The game gives a success when the user successfully creates the palindromes, and the user may not succeed / must manually return to the game if a success has not been reached.
+
+-River Game: The river game is coming soon...for now it serves as a reminder to get outside and be active.
+
 
 
 Future Directions:
