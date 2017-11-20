@@ -32,7 +32,11 @@ MiniGame Overviews:
 Future Directions:
 
 -Saving to network: given that network requests for Sergey's network were limited, we didn't get into saving game progress to a network, but it would be a great addition to functionality.
+
 -Preferences fragment: we never ended up implementing the preferences fragment, but left it for posterity to be built out if we ever decide to continue working on the game
+
 -Ranking fragment: it would be really neat if Dartmouth students could compare their score (in terms of time taken to complete the game) against other by looking at an additional "ranking" fragment
+
 -More minigames: the best way to build out the game is by adding more zones and minigames! You can never have too many minigames!
+
 -Uses: Use of this kind of game could be tailored to a variety of different types of campus exploration - from new student orientations to prospective student tours
