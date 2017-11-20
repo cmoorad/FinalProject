@@ -20,6 +20,10 @@ public class GameComplete extends AppCompatActivity {
     public View view;
     public String user;
     public String pass;
+    public Boolean urbansuccess;
+    public Boolean forestsuccess;
+    public Boolean riversuccess;
+    public Boolean gameFinished;
 
     public GameComplete() {
     }
@@ -34,6 +38,13 @@ public class GameComplete extends AppCompatActivity {
         Intent i = getIntent();
         user = i.getStringExtra("user");
         pass = i.getStringExtra("pass");
+        Bundle extras = i.getExtras();
+        if (extras != null) {
+            if (extras.containsKey("rivergame")) riversuccess = i.getExtras().getBoolean("rivergame");
+            if (extras.containsKey("urbangame")) urbansuccess = i.getExtras().getBoolean("urbangame");
+            if (extras.containsKey("forestgame")) forestsuccess = i.getExtras().getBoolean("urbangame");
+            if (extras.containsKey("gameFinished")) gameFinished = true;
+        }
 
         TextView congrats = findViewById(R.id.congrats);
         congrats.setText("Congratulations " + user + "!");
@@ -44,9 +55,9 @@ public class GameComplete extends AppCompatActivity {
         Intent myIntent = new Intent(this, MainActivity.class);
         myIntent.putExtra("user", user);
         myIntent.putExtra("pass", pass);
-        myIntent.putExtra("rivergame", true);
-        myIntent.putExtra("urbangame", true);
-        myIntent.putExtra("forestgame", true);
+        myIntent.putExtra("rivergame", riversuccess);
+        myIntent.putExtra("urbangame", urbansuccess);
+        myIntent.putExtra("forestgame", forestsuccess);
         startActivity(myIntent);
     }
 
@@ -57,9 +68,9 @@ public class GameComplete extends AppCompatActivity {
         Intent myIntent = new Intent(this, Game.class);
         myIntent.putExtra("user", user);
         myIntent.putExtra("pass", pass);
-        myIntent.putExtra("rivergame", true);
-        myIntent.putExtra("urbangame", true);
-        myIntent.putExtra("forestgame", true);
+        myIntent.putExtra("rivergame", riversuccess);
+        myIntent.putExtra("urbangame", urbansuccess);
+        myIntent.putExtra("forestgame", forestsuccess);
         myIntent.putExtra("gameFinished", true);
         startActivity(myIntent);
     }

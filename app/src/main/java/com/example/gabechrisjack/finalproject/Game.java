@@ -290,13 +290,15 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
 
         else if (inurban) {
-            Intent myIntent = new Intent(this, GameComplete.class);
+            Intent myIntent = new Intent(this, GameUrban.class);
             myIntent.putExtra("user", user1);
             myIntent.putExtra("pass", pass1);
             myIntent.putExtra("rivergame", riversuccess);
             myIntent.putExtra("urbangame", urbansuccess);
             myIntent.putExtra("forestgame", forestsuccess);
             startActivity(myIntent);
+
+
         }
 
         else if (inforest) {
