@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">jcoglab3</string>
+    <string name="app_name">Dart Games</string>
 
     <string name="profile_photo_file_name">profile_photo.png</string>
     <string name="dialog_fragment_tag_photo_picker">dialog_fragment_photo_picker</string>
