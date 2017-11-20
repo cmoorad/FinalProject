@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="kxml2-2.3.0">
     <CLASSES>
-      <root url="jar://$APPLICATION_HOME_DIR$/gradle/m2repository/net/sf/kxml/kxml2/2.3.0/kxml2-2.3.0.jar!/" />
+      <root url="jar:///private/var/folders/bs/8kv47fx55ng28nx4cp8f0jgm0000gn/T/AppTranslocation/BB558DB4-C476-4669-BA0E-2E05CFBEA39C/d/Android Studio 3.0 Preview.app/Contents/gradle/m2repository/net/sf/kxml/kxml2/2.3.0/kxml2-2.3.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
