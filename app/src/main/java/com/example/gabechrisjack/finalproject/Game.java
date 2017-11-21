@@ -280,8 +280,15 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         boolean inurban = PolyUtil.containsLocation(loc, urbanpoly, false);
         boolean inforest = PolyUtil.containsLocation(loc, forestpoly, false);
 
+        Intent myIntent = new Intent(this, ForestGameActivity.class);
+        myIntent.putExtra("user", user1);
+        myIntent.putExtra("pass", pass1);
+        myIntent.putExtra("rivergame", riversuccess);
+        myIntent.putExtra("urbangame", urbansuccess);
+        myIntent.putExtra("forestgame", forestsuccess);
+        startActivity(myIntent);
         //call game based on zone
-        if (inriver) {
+        /*if (inriver) {
             Intent myIntent = new Intent(this, GameComplete.class);
             myIntent.putExtra("user", user1);
             myIntent.putExtra("pass", pass1);
@@ -292,13 +299,15 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
         }
 
         else if (inurban) {
-            Intent myIntent = new Intent(this, GameComplete.class);
+            Intent myIntent = new Intent(this, GameUrban.class);
             myIntent.putExtra("user", user1);
             myIntent.putExtra("pass", pass1);
             myIntent.putExtra("rivergame", riversuccess);
             myIntent.putExtra("urbangame", urbansuccess);
             myIntent.putExtra("forestgame", forestsuccess);
             startActivity(myIntent);
+
+
         }
 
         else if (inforest) {
@@ -326,7 +335,7 @@ public class Game extends AppCompatActivity implements OnMapReadyCallback, Locat
                     "you can play a minigame!");
             dlgAlert.create().show();
 
-        }
+        }*/
     }
 
     //starts game complete activity if all minigames are won

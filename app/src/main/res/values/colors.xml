@@ -11,4 +11,6 @@
     <color name="transblue">#7f0044cc</color>
     <color name="transgreen">#7f00ff00</color>
     <color name="transgrey">#7fA9A9A9</color>
+    <color name="gradient_start">#d3d3d3</color>
+    <color name="gradient_end">#000000</color>
 </resources>
